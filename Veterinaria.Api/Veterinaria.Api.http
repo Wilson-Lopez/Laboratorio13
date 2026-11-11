@@ -1,0 +1,224 @@
+### Pruebas de la API Veterinaria (ejecutar en orden, con los datos recién cargados por VeterinariaDB.sql)
+@Host = http://localhost:5169
+
+############ PROPIETARIOS ############
+
+### 200 - Listar propietarios
+GET {{Host}}/api/propietarios
+
+### 200 - Filtro por query string: nombres
+GET {{Host}}/api/propietarios?nombres=Rojas
+
+### 200 - Filtro por query string: DNI que empieza con 7
+GET {{Host}}/api/propietarios?dni=7
+
+### 200 - Obtener propietario
+GET {{Host}}/api/propietarios/1
+
+### 404 - Propietario inexistente
+GET {{Host}}/api/propietarios/999
+
+### 200 - Ruta anidada: mascotas del propietario
+GET {{Host}}/api/propietarios/1/mascotas
+
+### 404 - Ruta anidada con propietario inexistente
+GET {{Host}}/api/propietarios/999/mascotas
+
+### 201 - Crear propietario
+# @name nuevoPropietario
+POST {{Host}}/api/propietarios
+Content-Type: application/json
+
+{
+  "nombres": "Rosa María Gutiérrez León",
+  "dni": "43218765",
+  "telefono": "978456123",
+  "correo": "rosa.gutierrez@correo.pe"
+}
+
+### 400 - Datos inválidos (sin nombres, DNI corto y correo mal escrito)
+POST {{Host}}/api/propietarios
+Content-Type: application/json
+
+{
+  "dni": "123",
+  "telefono": "978456123",
+  "correo": "rosa.correo.pe"
+}
+
+### 409 - Regla de negocio: DNI repetido
+POST {{Host}}/api/propietarios
+Content-Type: application/json
+
+{
+  "nombres": "Otra Persona",
+  "dni": "45879632",
+  "telefono": "900000000"
+}
+
+### 204 - Actualizar propietario (el DNI no se modifica)
+PUT {{Host}}/api/propietarios/{{nuevoPropietario.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombres": "Rosa María Gutiérrez León",
+  "telefono": "999888777",
+  "correo": "rosa.gutierrez@veterinaria.pe"
+}
+
+### 400 - Actualizar con datos inválidos (nombres muy cortos y sin teléfono)
+PUT {{Host}}/api/propietarios/{{nuevoPropietario.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombres": "Ro"
+}
+
+### 404 - Actualizar propietario inexistente
+PUT {{Host}}/api/propietarios/999
+Content-Type: application/json
+
+{
+  "nombres": "Nadie",
+  "telefono": "900000000"
+}
+
+### 409 - Regla de negocio: no se elimina un propietario con mascotas
+DELETE {{Host}}/api/propietarios/1
+
+### 204 - Eliminar propietario sin mascotas
+DELETE {{Host}}/api/propietarios/{{nuevoPropietario.response.body.$.id}}
+
+### 404 - Eliminar propietario inexistente
+DELETE {{Host}}/api/propietarios/999
+
+############ MASCOTAS ############
+
+### 200 - Listar mascotas
+GET {{Host}}/api/mascotas
+
+### 200 - Filtro por query string: especie
+GET {{Host}}/api/mascotas?especie=Perro
+
+### 200 - Filtro por query string: especie y raza
+GET {{Host}}/api/mascotas?especie=Gato&raza=Persa
+
+### 200 - Obtener mascota
+GET {{Host}}/api/mascotas/1
+
+### 404 - Mascota inexistente
+GET {{Host}}/api/mascotas/999
+
+### 201 - Crear mascota
+# @name nuevaMascota
+POST {{Host}}/api/mascotas
+Content-Type: application/json
+
+{
+  "nombre": "Max",
+  "especie": "Perro",
+  "raza": "Schnauzer",
+  "fechaNacimiento": "2024-08-12",
+  "peso": 7.5,
+  "propietarioId": 2
+}
+
+### 400 - Datos inválidos (sin nombre ni fecha, peso 0 y sin propietario)
+POST {{Host}}/api/mascotas
+Content-Type: application/json
+
+{
+  "especie": "Perro",
+  "peso": 0
+}
+
+### 400 - Propietario inexistente (lo detecta la capa de Negocio)
+POST {{Host}}/api/mascotas
+Content-Type: application/json
+
+{
+  "nombre": "Nube",
+  "especie": "Gato",
+  "fechaNacimiento": "2023-03-01",
+  "peso": 3.2,
+  "propietarioId": 999
+}
+
+### 400 - Fecha de nacimiento futura (lo detecta la capa de Negocio)
+POST {{Host}}/api/mascotas
+Content-Type: application/json
+
+{
+  "nombre": "Nube",
+  "especie": "Gato",
+  "fechaNacimiento": "2030-01-01",
+  "peso": 3.2,
+  "propietarioId": 2
+}
+
+### 409 - Regla de negocio: el propietario ya tiene una mascota con ese nombre
+POST {{Host}}/api/mascotas
+Content-Type: application/json
+
+{
+  "nombre": "Firulais",
+  "especie": "Perro",
+  "fechaNacimiento": "2024-01-20",
+  "peso": 10,
+  "propietarioId": 1
+}
+
+### 204 - Actualizar mascota
+PUT {{Host}}/api/mascotas/{{nuevaMascota.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre": "Max",
+  "especie": "Perro",
+  "raza": "Schnauzer miniatura",
+  "fechaNacimiento": "2024-08-12",
+  "peso": 8.1,
+  "propietarioId": 2
+}
+
+### 400 - Actualizar con datos inválidos (especie muy corta y peso fuera de rango)
+PUT {{Host}}/api/mascotas/{{nuevaMascota.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre": "Max",
+  "especie": "P",
+  "fechaNacimiento": "2024-08-12",
+  "peso": 500,
+  "propietarioId": 2
+}
+
+### 404 - Actualizar mascota inexistente
+PUT {{Host}}/api/mascotas/999
+Content-Type: application/json
+
+{
+  "nombre": "Max",
+  "especie": "Perro",
+  "fechaNacimiento": "2024-08-12",
+  "peso": 8.1,
+  "propietarioId": 2
+}
+
+### 409 - Regla de negocio: el propietario 2 ya tiene otra mascota llamada Rocky
+PUT {{Host}}/api/mascotas/{{nuevaMascota.response.body.$.id}}
+Content-Type: application/json
+
+{
+  "nombre": "Rocky",
+  "especie": "Perro",
+  "fechaNacimiento": "2024-08-12",
+  "peso": 8.1,
+  "propietarioId": 2
+}
+
+### 204 - Eliminar mascota
+DELETE {{Host}}/api/mascotas/{{nuevaMascota.response.body.$.id}}
+
+### 404 - Eliminar mascota inexistente
+DELETE {{Host}}/api/mascotas/999
