@@ -67,9 +67,8 @@ function avisar(mensaje, tipo = 'exito') {
 }
 
 function mostrarEstadoApi(estado, texto) {
-  const indicador = $('#estado-api');
-  indicador.dataset.estado = estado;
-  indicador.textContent = texto;
+  $('#estado-api').dataset.estado = estado;
+  $('#estado-api-texto').textContent = texto;
 }
 
 function mostrarCargando(cuerpo, columnas) {
@@ -92,11 +91,13 @@ function botonAccion(nombreIcono, etiqueta, alPulsar, clase = '') {
   return el('button', { class: `boton-icono ${clase}`, type: 'button', title: etiqueta, 'aria-label': etiqueta, onclick: alPulsar }, icono(nombreIcono));
 }
 
+const sinAcentos = (texto) => texto.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase();
 const formatoPeso = new Intl.NumberFormat('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 // Las fechas llegan como "2019-03-15" (DateOnly); se formatean en UTC para que no cambie el día
 const formatoFecha = new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'UTC' });
 const etiquetaMascotas = (n) => (n === 0 ? 'Sin mascotas' : n === 1 ? '1 mascota' : `${n} mascotas`);
 const ESPECIES_SUGERIDAS = ['Perro', 'Gato', 'Conejo', 'Ave', 'Hámster'];
+const TAMANO_PAGINA = 6;
 
 function hoyIso() {
   // en-CA da el formato AAAA-MM-DD con la fecha local
@@ -109,9 +110,154 @@ function edad(fechaIso) {
   let meses = (hoy.getFullYear() - anio) * 12 + (hoy.getMonth() + 1 - mes);
   if (hoy.getDate() < dia) meses--;
   if (meses < 1) return 'Menos de 1 mes';
-  if (meses < 12) return meses === 1 ? '1 mes' : `${meses} meses`;
+
   const anios = Math.floor(meses / 12);
-  return anios === 1 ? '1 año' : `${anios} años`;
+  const resto = meses % 12;
+  const textoAnios = anios === 1 ? '1 año' : `${anios} años`;
+  const textoMeses = resto === 1 ? '1 mes' : `${resto} meses`;
+  if (anios === 0) return textoMeses;
+  return resto === 0 ? textoAnios : `${textoAnios} y ${textoMeses}`;
+}
+
+// --- Avatares y etiquetas de especie (la API no guarda fotos) ---
+
+const TIPOS_ESPECIE = [
+  ['perro', ['perro', 'perra', 'cachorro', 'canino']],
+  ['gato', ['gato', 'gata', 'felino']],
+  ['conejo', ['conejo', 'coneja']],
+  ['ave', ['ave', 'loro', 'canario', 'perico', 'periquito', 'pajaro', 'cotorra']],
+];
+const ICONO_AVATAR = { perro: 'perro', gato: 'gato', conejo: 'conejo', ave: 'ave', otro: 'huella' };
+
+function tipoEspecie(especie) {
+  const texto = sinAcentos(especie ?? '').trim();
+  const tipo = TIPOS_ESPECIE.find(([, palabras]) => palabras.some((p) => texto === p || texto.startsWith(`${p} `)));
+  return tipo?.[0] ?? 'otro';
+}
+
+function avatarMascota(especie, chico = false) {
+  const tipo = tipoEspecie(especie);
+  return el('span', { class: `avatar avatar--${tipo}${chico ? ' avatar--chico' : ''}`, 'aria-hidden': 'true' }, icono(ICONO_AVATAR[tipo]));
+}
+
+function chipEspecie(especie) {
+  const tipo = tipoEspecie(especie);
+  const nombreIcono = tipo === 'conejo' || tipo === 'ave' ? tipo : 'huella';
+  return el('span', { class: `chip chip--${tipo}` }, especie, icono(nombreIcono));
+}
+
+function iniciales(nombres) {
+  // Con nombres y apellidos peruanos (ej. Diego Alonso Salazar Flores) se toma el primer nombre y el primer apellido
+  const partes = nombres.trim().split(/\s+/);
+  const segunda = partes.length >= 4 ? partes[2] : partes[1];
+  return ((partes[0]?.[0] ?? '') + (segunda?.[0] ?? '')).toUpperCase();
+}
+
+function avatarPersona(nombres, grande = false) {
+  // El color sale del nombre, así cada propietario conserva siempre el mismo
+  const tono = [...nombres].reduce((suma, letra) => suma + letra.codePointAt(0), 0) % 6;
+  return el('span', { class: `avatar avatar--persona${grande ? ' avatar--grande' : ''}`, 'data-tono': tono, 'aria-hidden': 'true' }, iniciales(nombres));
+}
+
+// --- Campos con botón para borrar ---
+
+function actualizarLimpiadores() {
+  document.querySelectorAll('.entrada').forEach((entrada) => {
+    $('.entrada__limpiar', entrada).hidden = !$('input', entrada).value;
+  });
+}
+
+document.querySelectorAll('.entrada').forEach((entrada) => {
+  const campo = $('input', entrada);
+  campo.addEventListener('input', actualizarLimpiadores);
+  $('.entrada__limpiar', entrada).addEventListener('click', () => {
+    campo.value = '';
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+    campo.focus();
+  });
+});
+
+// --- Tablas con orden y paginación (se ordena y pagina en el navegador lo que devolvió la API) ---
+
+function crearTabla(opciones) {
+  const tabla = { datos: [], pagina: 1, ...opciones, orden: { ...opciones.ordenInicial } };
+  tabla.cabecera.querySelectorAll('[data-orden]').forEach((boton) => {
+    boton.addEventListener('click', () => {
+      const campo = boton.dataset.orden;
+      tabla.orden = { campo, ascendente: tabla.orden.campo === campo ? !tabla.orden.ascendente : true };
+      tabla.pagina = 1;
+      pintarTabla(tabla);
+    });
+  });
+  return tabla;
+}
+
+function pintarTabla(tabla) {
+  const { datos, cuerpo, columnas, orden } = tabla;
+
+  tabla.cabecera.querySelectorAll('[data-orden]').forEach((boton) => {
+    const activo = boton.dataset.orden === orden.campo;
+    boton.closest('th').setAttribute('aria-sort', activo ? (orden.ascendente ? 'ascending' : 'descending') : 'none');
+    $('use', boton).setAttribute('href', activo ? (orden.ascendente ? '#i-arriba' : '#i-abajo') : '#i-orden');
+  });
+  tabla.conteo.textContent = `(${datos.length})`;
+
+  if (datos.length === 0) {
+    const { titulo, detalle } = tabla.mensajeVacio();
+    mostrarMensaje(cuerpo, columnas, titulo, detalle);
+    tabla.paginacion.hidden = true;
+    return;
+  }
+
+  const comparar = tabla.comparadores[orden.campo];
+  const ordenados = [...datos].sort((a, b) => comparar(a, b) * (orden.ascendente ? 1 : -1));
+  const totalPaginas = Math.ceil(ordenados.length / TAMANO_PAGINA);
+  tabla.pagina = Math.min(Math.max(tabla.pagina, 1), totalPaginas);
+  const inicio = (tabla.pagina - 1) * TAMANO_PAGINA;
+
+  cuerpo.replaceChildren(...ordenados.slice(inicio, inicio + TAMANO_PAGINA).map(tabla.fila));
+  pintarPaginacion(tabla, ordenados.length, totalPaginas);
+}
+
+function paginasVisibles(actual, total) {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const numeros = [...new Set([1, actual - 1, actual, actual + 1, total])]
+    .filter((p) => p >= 1 && p <= total)
+    .sort((a, b) => a - b);
+  return numeros.flatMap((p, i) => (i > 0 && p - numeros[i - 1] > 1 ? ['…', p] : [p]));
+}
+
+function pintarPaginacion(tabla, total, totalPaginas) {
+  const irA = (pagina) => {
+    tabla.pagina = pagina;
+    pintarTabla(tabla);
+  };
+  const desde = (tabla.pagina - 1) * TAMANO_PAGINA + 1;
+  const hasta = Math.min(tabla.pagina * TAMANO_PAGINA, total);
+
+  const anterior = el('button', { class: 'paginacion__boton', type: 'button', 'aria-label': 'Página anterior', onclick: () => irA(tabla.pagina - 1) }, icono('izquierda'));
+  const siguiente = el('button', { class: 'paginacion__boton', type: 'button', 'aria-label': 'Página siguiente', onclick: () => irA(tabla.pagina + 1) }, icono('derecha'));
+  anterior.disabled = tabla.pagina === 1;
+  siguiente.disabled = tabla.pagina === totalPaginas;
+
+  const numeros = paginasVisibles(tabla.pagina, totalPaginas).map((pagina) => {
+    if (pagina === '…') return el('span', { class: 'paginacion__puntos' }, '…');
+    const boton = el('button', { class: 'paginacion__boton', type: 'button', 'aria-label': `Página ${pagina}`, onclick: () => irA(pagina) }, String(pagina));
+    if (pagina === tabla.pagina) boton.setAttribute('aria-current', 'page');
+    return boton;
+  });
+
+  tabla.paginacion.replaceChildren(
+    el('span'),
+    el('nav', { class: 'paginacion__paginas', 'aria-label': 'Paginación' }, anterior, ...numeros, siguiente),
+    el('span', { class: 'paginacion__resumen' }, `Resultados: ${desde}–${hasta} de ${total}`));
+  tabla.paginacion.hidden = false;
+}
+
+function mostrarErrorDeCarga(tabla, titulo, error) {
+  mostrarMensaje(tabla.cuerpo, tabla.columnas, titulo, error.message, { texto: 'Reintentar', alPulsar: actualizarTodo });
+  tabla.paginacion.hidden = true;
+  tabla.conteo.textContent = '';
 }
 
 // --- Formularios y errores de la API ---
@@ -213,23 +359,17 @@ async function cargarResumen() {
 
 // --- Propietarios ---
 
-const filasPropietarios = $('#filas-propietarios');
 const buscarPropietario = $('#buscar-propietario');
 let turnoPropietarios = 0;
 
-function pintarPropietarios(propietarios) {
-  if (propietarios.length === 0) {
-    const hayBusqueda = Boolean(buscarPropietario.value.trim());
-    mostrarMensaje(filasPropietarios, 5,
-      hayBusqueda ? 'Sin resultados' : 'Aún no hay propietarios',
-      hayBusqueda ? 'Ningún propietario coincide con tu búsqueda.' : 'Registra el primero para empezar.');
-    return;
-  }
-
-  filasPropietarios.replaceChildren(...propietarios.map((propietario) => el('tr', {},
+function filaPropietario(propietario) {
+  return el('tr', {},
     el('td', { class: 'celda-principal' },
-      el('div', { class: 'titulo-fila' }, propietario.nombres),
-      el('div', { class: 'subtitulo-fila' }, propietario.correo ?? 'Sin correo')),
+      el('div', { class: 'celda-persona' },
+        avatarPersona(propietario.nombres),
+        el('div', {},
+          el('div', { class: 'titulo-fila' }, propietario.nombres),
+          el('div', { class: 'subtitulo-fila' }, propietario.correo ?? 'Sin correo')))),
     el('td', { class: 'dato-fijo', 'data-etiqueta': 'DNI' }, propietario.dni),
     el('td', { class: 'dato-fijo', 'data-etiqueta': 'Teléfono' }, propietario.telefono),
     el('td', { 'data-etiqueta': 'Mascotas' },
@@ -242,12 +382,30 @@ function pintarPropietarios(propietarios) {
     el('td', { class: 'celda-acciones' },
       el('div', { class: 'acciones-fila' },
         botonAccion('editar', `Editar a ${propietario.nombres}`, () => editarPropietario(propietario.id)),
-        botonAccion('eliminar', `Eliminar a ${propietario.nombres}`, () => eliminarPropietario(propietario), 'boton-icono--peligro'))))));
+        botonAccion('eliminar', `Eliminar a ${propietario.nombres}`, () => eliminarPropietario(propietario), 'boton-icono--peligro'))));
 }
+
+const tablaPropietarios = crearTabla({
+  cabecera: $('#tabla-propietarios thead'),
+  cuerpo: $('#filas-propietarios'),
+  paginacion: $('#paginacion-propietarios'),
+  conteo: $('#resultado-propietarios'),
+  columnas: 5,
+  ordenInicial: { campo: 'nombres', ascendente: true },
+  comparadores: {
+    nombres: (a, b) => a.nombres.localeCompare(b.nombres, 'es'),
+    dni: (a, b) => a.dni.localeCompare(b.dni),
+    cantidadMascotas: (a, b) => a.cantidadMascotas - b.cantidadMascotas,
+  },
+  mensajeVacio: () => (buscarPropietario.value.trim()
+    ? { titulo: 'Sin resultados', detalle: 'Ningún propietario coincide con tu búsqueda.' }
+    : { titulo: 'Aún no hay propietarios', detalle: 'Registra el primero para empezar.' }),
+  fila: filaPropietario,
+});
 
 async function cargarPropietarios() {
   const turno = ++turnoPropietarios;
-  if (filasPropietarios.children.length === 0) mostrarCargando(filasPropietarios, 5);
+  if (tablaPropietarios.cuerpo.children.length === 0) mostrarCargando(tablaPropietarios.cuerpo, 5);
 
   // La búsqueda se resuelve en la API con el GET por query string: solo números = DNI, si no = nombres
   const texto = buscarPropietario.value.trim();
@@ -257,11 +415,11 @@ async function cargarPropietarios() {
   try {
     const propietarios = await pedir(`/propietarios?${consulta}`);
     // Si el usuario siguió escribiendo, se descarta esta respuesta porque ya hay otra más reciente
-    if (turno === turnoPropietarios) pintarPropietarios(propietarios);
+    if (turno !== turnoPropietarios) return;
+    tablaPropietarios.datos = propietarios;
+    pintarTabla(tablaPropietarios);
   } catch (error) {
-    if (turno === turnoPropietarios) {
-      mostrarMensaje(filasPropietarios, 5, 'No se pudieron cargar los propietarios', error.message, { texto: 'Reintentar', alPulsar: actualizarTodo });
-    }
+    if (turno === turnoPropietarios) mostrarErrorDeCarga(tablaPropietarios, 'No se pudieron cargar los propietarios', error);
     throw error;
   }
 }
@@ -269,6 +427,7 @@ async function cargarPropietarios() {
 let esperaBusqueda;
 buscarPropietario.addEventListener('input', () => {
   clearTimeout(esperaBusqueda);
+  tablaPropietarios.pagina = 1;
   esperaBusqueda = setTimeout(() => cargarPropietarios().catch(() => {}), 300);
 });
 
@@ -324,6 +483,47 @@ formPropietario.addEventListener('submit', (evento) => {
     id ? 'Propietario actualizado.' : 'Propietario registrado.');
 });
 
+// --- Contacto del propietario (GET api/propietarios/{id}) ---
+
+let propietarioEnContacto = null;
+
+function datoContacto(nombreIcono, etiqueta, valor) {
+  return el('div', { class: 'contacto__fila' },
+    icono(nombreIcono),
+    el('span', { class: 'contacto__etiqueta' }, etiqueta),
+    el('span', { class: 'contacto__valor' }, valor));
+}
+
+async function verContacto(propietarioId, nombres) {
+  const cuerpo = $('#contenido-contacto');
+  propietarioEnContacto = null;
+  $('#titulo-contacto').textContent = nombres;
+  $('#avatar-contacto').replaceChildren(avatarPersona(nombres, true));
+  $('#contacto-mascotas').disabled = true;
+  cuerpo.replaceChildren(el('p', { class: 'texto-suave' }, 'Cargando…'));
+  $('#dialogo-contacto').showModal();
+
+  try {
+    const propietario = await pedir(`/propietarios/${propietarioId}`);
+    propietarioEnContacto = propietario;
+    $('#contacto-mascotas').disabled = false;
+    cuerpo.replaceChildren(el('div', { class: 'contacto' },
+      datoContacto('dni', 'DNI', propietario.dni),
+      datoContacto('telefono', 'Teléfono', el('a', { href: `tel:${propietario.telefono}` }, propietario.telefono)),
+      datoContacto('correo', 'Correo', propietario.correo
+        ? el('a', { href: `mailto:${propietario.correo}` }, propietario.correo)
+        : 'Sin correo'),
+      datoContacto('huella', 'Mascotas', etiquetaMascotas(propietario.cantidadMascotas))));
+  } catch (error) {
+    cuerpo.replaceChildren(el('p', { class: 'texto-suave' }, error.message));
+  }
+}
+
+$('#contacto-mascotas').addEventListener('click', () => {
+  $('#dialogo-contacto').close();
+  abrirDetalle(propietarioEnContacto);
+});
+
 // --- Mascotas de un propietario (ruta anidada) ---
 
 let propietarioEnDetalle = null;
@@ -339,9 +539,11 @@ async function abrirDetalle(propietario) {
     const mascotas = await pedir(`/propietarios/${propietario.id}/mascotas`);
     lista.replaceChildren(...(mascotas.length
       ? mascotas.map((m) => el('li', {},
-        el('span', { class: 'titulo-fila' }, m.nombre),
-        el('span', { class: 'chip' }, m.especie),
-        el('span', { class: 'texto-suave' }, m.raza ?? 'Sin raza'),
+        avatarMascota(m.especie, true),
+        el('span', { class: 'lista-mascotas__nombre' },
+          el('span', { class: 'titulo-fila' }, m.nombre),
+          el('span', { class: 'subtitulo-fila' }, m.raza ?? 'Sin raza')),
+        chipEspecie(m.especie),
         el('span', { class: 'lista-mascotas__dato' }, `${edad(m.fechaNacimiento)} · ${formatoPeso.format(m.peso)} kg`)))
       : [el('li', { class: 'mensaje-lista' }, 'Este propietario aún no tiene mascotas.')]));
   } catch (error) {
@@ -356,40 +558,59 @@ $('#detalle-agregar').addEventListener('click', () => {
 
 // --- Mascotas ---
 
-const filasMascotas = $('#filas-mascotas');
 const filtros = $('#filtros-mascotas');
 let turnoMascotas = 0;
 
-function pintarMascotas(mascotas) {
-  if (mascotas.length === 0) {
-    const hayFiltros = [...new FormData(filtros).values()].some((valor) => String(valor).trim());
-    mostrarMensaje(filasMascotas, 6,
-      hayFiltros ? 'Sin resultados' : 'Aún no hay mascotas',
-      hayFiltros ? 'Ninguna mascota coincide con los filtros.' : 'Registra la primera para empezar.');
-    return;
-  }
-
-  filasMascotas.replaceChildren(...mascotas.map((mascota) => el('tr', {},
+function filaMascota(mascota) {
+  return el('tr', {},
     el('td', { class: 'celda-principal' },
-      el('div', { class: 'titulo-fila' }, mascota.nombre),
-      el('div', { class: 'subtitulo-fila' }, mascota.raza ?? 'Sin raza')),
-    el('td', { 'data-etiqueta': 'Especie' }, el('span', { class: 'chip' }, mascota.especie)),
+      el('div', { class: 'celda-mascota' },
+        avatarMascota(mascota.especie),
+        el('div', {},
+          el('div', { class: 'titulo-fila' }, mascota.nombre),
+          el('div', { class: 'subtitulo-fila' }, mascota.raza ?? 'Sin raza')))),
+    el('td', { 'data-etiqueta': 'Especie' }, chipEspecie(mascota.especie)),
     el('td', { 'data-etiqueta': 'Nacimiento' },
       el('div', {},
         el('div', { class: 'dato-fijo' }, formatoFecha.format(new Date(mascota.fechaNacimiento))),
         el('div', { class: 'subtitulo-fila' }, edad(mascota.fechaNacimiento)))),
     el('td', { class: 'numero', 'data-etiqueta': 'Peso' }, `${formatoPeso.format(mascota.peso)} kg`),
-    // propietario es el nombre que devuelve el MappingProfile (ForMember), no el objeto
-    el('td', { 'data-etiqueta': 'Propietario' }, mascota.propietario),
+    el('td', { 'data-etiqueta': 'Propietario' },
+      el('div', { class: 'celda-persona' },
+        avatarPersona(mascota.propietario),
+        el('div', {},
+          // propietario es el nombre que devuelve el MappingProfile (ForMember), no el objeto
+          el('div', { class: 'nombre-persona' }, mascota.propietario),
+          el('button', { class: 'enlace', type: 'button', onclick: () => verContacto(mascota.propietarioId, mascota.propietario) }, 'Ver contacto')))),
     el('td', { class: 'celda-acciones' },
       el('div', { class: 'acciones-fila' },
         botonAccion('editar', `Editar a ${mascota.nombre}`, () => editarMascota(mascota.id)),
-        botonAccion('eliminar', `Eliminar a ${mascota.nombre}`, () => eliminarMascota(mascota), 'boton-icono--peligro'))))));
+        botonAccion('eliminar', `Eliminar a ${mascota.nombre}`, () => eliminarMascota(mascota), 'boton-icono--peligro'))));
 }
+
+const tablaMascotas = crearTabla({
+  cabecera: $('#tabla-mascotas thead'),
+  cuerpo: $('#filas-mascotas'),
+  paginacion: $('#paginacion-mascotas'),
+  conteo: $('#resultado-mascotas'),
+  columnas: 6,
+  ordenInicial: { campo: 'nombre', ascendente: true },
+  comparadores: {
+    nombre: (a, b) => a.nombre.localeCompare(b.nombre, 'es'),
+    especie: (a, b) => a.especie.localeCompare(b.especie, 'es') || a.nombre.localeCompare(b.nombre, 'es'),
+    fechaNacimiento: (a, b) => a.fechaNacimiento.localeCompare(b.fechaNacimiento),
+    peso: (a, b) => a.peso - b.peso,
+    propietario: (a, b) => a.propietario.localeCompare(b.propietario, 'es') || a.nombre.localeCompare(b.nombre, 'es'),
+  },
+  mensajeVacio: () => ([...new FormData(filtros).values()].some((valor) => String(valor).trim())
+    ? { titulo: 'Sin resultados', detalle: 'Ninguna mascota coincide con los filtros.' }
+    : { titulo: 'Aún no hay mascotas', detalle: 'Registra la primera para empezar.' }),
+  fila: filaMascota,
+});
 
 async function cargarMascotas() {
   const turno = ++turnoMascotas;
-  if (filasMascotas.children.length === 0) mostrarCargando(filasMascotas, 6);
+  if (tablaMascotas.cuerpo.children.length === 0) mostrarCargando(tablaMascotas.cuerpo, 6);
 
   // Los filtros se resuelven en la API, con el GET por query string
   const consulta = new URLSearchParams();
@@ -399,11 +620,11 @@ async function cargarMascotas() {
 
   try {
     const mascotas = await pedir(`/mascotas?${consulta}`);
-    if (turno === turnoMascotas) pintarMascotas(mascotas);
+    if (turno !== turnoMascotas) return;
+    tablaMascotas.datos = mascotas;
+    pintarTabla(tablaMascotas);
   } catch (error) {
-    if (turno === turnoMascotas) {
-      mostrarMensaje(filasMascotas, 6, 'No se pudieron cargar las mascotas', error.message, { texto: 'Reintentar', alPulsar: actualizarTodo });
-    }
+    if (turno === turnoMascotas) mostrarErrorDeCarga(tablaMascotas, 'No se pudieron cargar las mascotas', error);
     throw error;
   }
 }
@@ -411,11 +632,16 @@ async function cargarMascotas() {
 let esperaFiltro;
 filtros.addEventListener('input', () => {
   clearTimeout(esperaFiltro);
+  tablaMascotas.pagina = 1;
   esperaFiltro = setTimeout(() => cargarMascotas().catch(() => {}), 300);
 });
 filtros.addEventListener('reset', () => {
   // El evento ocurre antes de vaciar los campos, por eso se espera al siguiente ciclo
-  setTimeout(() => cargarMascotas().catch(() => {}));
+  setTimeout(() => {
+    actualizarLimpiadores();
+    tablaMascotas.pagina = 1;
+    cargarMascotas().catch(() => {});
+  });
 });
 filtros.addEventListener('submit', (evento) => evento.preventDefault());
 
@@ -525,14 +751,18 @@ function confirmarEliminacion(texto, operacion, mensajeExito) {
 
 // --- Navegación y carga inicial ---
 
+const seccionActual = () => (location.hash === '#mascotas' ? 'mascotas' : 'propietarios');
+
 function mostrarSeccion() {
-  const actual = location.hash === '#mascotas' ? 'mascotas' : 'propietarios';
+  const actual = seccionActual();
   for (const nombre of ['propietarios', 'mascotas']) {
     $(`#seccion-${nombre}`).hidden = nombre !== actual;
-    const pestana = $(`.pestana[data-seccion="${nombre}"]`);
-    if (nombre === actual) pestana.setAttribute('aria-current', 'page');
-    else pestana.removeAttribute('aria-current');
   }
+  // Pestañas de la cabecera y barra lateral marcan la misma sección
+  document.querySelectorAll('[data-seccion]').forEach((enlace) => {
+    if (enlace.dataset.seccion === actual) enlace.setAttribute('aria-current', 'page');
+    else enlace.removeAttribute('aria-current');
+  });
 }
 
 async function actualizarTodo() {
@@ -549,6 +779,9 @@ document.querySelectorAll('[data-cerrar]').forEach((boton) => {
 });
 $('#nuevo-propietario').addEventListener('click', () => abrirFormularioPropietario());
 $('#nueva-mascota').addEventListener('click', () => abrirFormularioMascota());
+$('#ir-busqueda').addEventListener('click', () => {
+  (seccionActual() === 'mascotas' ? $('#filtro-nombre') : buscarPropietario).focus();
+});
 window.addEventListener('hashchange', mostrarSeccion);
 
 mostrarSeccion();

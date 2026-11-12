@@ -3,16 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="light dark">
+  <meta name="color-scheme" content="light">
   <meta name="description" content="Panel de gestión de propietarios y mascotas de la clínica veterinaria.">
   <title>Clínica Veterinaria · Panel de gestión</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f766e'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='4' r='2'/%3E%3Ccircle cx='18' cy='8' r='2'/%3E%3Ccircle cx='20' cy='16' r='2'/%3E%3Cpath d='M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%232c8577'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='4' r='2'/%3E%3Ccircle cx='18' cy='8' r='2'/%3E%3Ccircle cx='20' cy='16' r='2'/%3E%3Cpath d='M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z'/%3E%3C/g%3E%3C/svg%3E">
   <link rel="stylesheet" href="estilos.css">
   <script type="module" src="app.js"></script>
 </head>
 <body>
   <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <symbol id="i-huella" viewBox="0 0 24 24"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></symbol>
+    <symbol id="i-perro" viewBox="0 0 24 24"><path d="M11.25 16.25h1.5L12 17z"/><path d="M16 14v.5"/><path d="M4.42 11.247A13.152 13.152 0 0 0 4 14.556C4 18.728 7.582 21 12 21s8-2.272 8-6.444a11.702 11.702 0 0 0-.493-3.309"/><path d="M8 14v.5"/><path d="M8.5 8.5c-.384 1.05-1.083 2.028-2.344 2.5-1.931.722-3.576-.297-3.656-1-.113-.994 1.177-6.53 4-7 1.923-.321 3.651.845 3.651 2.235A7.497 7.497 0 0 1 14 5.277c0-1.39 1.844-2.598 3.767-2.277 2.823.47 4.113 6.006 4 7-.08.703-1.725 1.722-3.656 1-1.261-.472-1.855-1.45-2.239-2.5"/></symbol>
+    <symbol id="i-gato" viewBox="0 0 24 24"><path d="M12 5c.67 0 1.35.09 2 .26 1.78-2 5.03-2.84 6.42-2.26 1.4.58-.42 7-.42 7 .57 1.07 1 2.24 1 3.44C21 17.9 16.97 21 12 21s-9-3-9-7.56c0-1.25.5-2.4 1-3.44 0 0-1.89-6.42-.5-7 1.39-.58 4.72.23 6.5 2.23A9.04 9.04 0 0 1 12 5Z"/><path d="M8 14v.5"/><path d="M16 14v.5"/><path d="M11.25 16.25h1.5L12 17l-.75-.75Z"/></symbol>
+    <symbol id="i-conejo" viewBox="0 0 24 24"><path d="M13 16a3 3 0 0 1 2.24 5"/><path d="M18 12h.01"/><path d="M18 21h-8a4 4 0 0 1-4-4 7 7 0 0 1 7-7h.2L9.6 6.4a1 1 0 1 1 2.8-2.8L15.8 7h.2c3.3 0 6 2.7 6 6v1a2 2 0 0 1-2 2h-1a3 3 0 0 0-3 3"/><path d="M20 8.54V4a2 2 0 1 0-4 0v3"/><path d="M7.612 12.524a3 3 0 1 0-1.6 4.3"/></symbol>
+    <symbol id="i-ave" viewBox="0 0 24 24"><path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/></symbol>
+    <symbol id="i-usuarios" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="i-codigo" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
     <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-editar" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
     <symbol id="i-eliminar" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
@@ -21,113 +27,169 @@
     <symbol id="i-externo" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></symbol>
     <symbol id="i-alerta" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
     <symbol id="i-listo" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-orden" viewBox="0 0 24 24"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></symbol>
+    <symbol id="i-arriba" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+    <symbol id="i-abajo" viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></symbol>
+    <symbol id="i-izquierda" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-derecha" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-telefono" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-correo" viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></symbol>
+    <symbol id="i-dni" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M5 16c.6-1.2 1.6-1.8 3-1.8s2.4.6 3 1.8M14 10h4M14 14h3"/></symbol>
   </svg>
 
-  <header class="cabecera">
-    <div class="cabecera__fila">
-      <a class="marca" href="#propietarios">
-        <span class="marca__icono"><svg class="icono" aria-hidden="true"><use href="#i-huella"/></svg></span>
-        <span class="marca__texto">
-          <strong>Clínica Veterinaria</strong>
-          <small>Panel de gestión</small>
-        </span>
-      </a>
-      <div class="cabecera__acciones">
-        <span class="estado-api" id="estado-api" data-estado="cargando" role="status">Conectando…</span>
-        <a class="enlace-api" href="/swagger" target="_blank" rel="noopener">
-          Swagger
-          <svg class="icono" aria-hidden="true"><use href="#i-externo"/></svg>
+  <div class="fondo" aria-hidden="true"></div>
+
+  <aside class="barra-lateral" aria-label="Navegación">
+    <a class="barra-lateral__item" href="#propietarios" data-seccion="propietarios" title="Propietarios">
+      <svg class="icono" aria-hidden="true"><use href="#i-usuarios"/></svg>
+      <span class="solo-lector">Propietarios</span>
+    </a>
+    <a class="barra-lateral__item" href="#mascotas" data-seccion="mascotas" title="Mascotas">
+      <svg class="icono" aria-hidden="true"><use href="#i-huella"/></svg>
+      <span class="solo-lector">Mascotas</span>
+    </a>
+    <button class="barra-lateral__item" id="ir-busqueda" type="button" title="Buscar">
+      <svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>
+      <span class="solo-lector">Buscar</span>
+    </button>
+    <a class="barra-lateral__item barra-lateral__item--abajo" href="/swagger" target="_blank" rel="noopener" title="Documentación de la API (Swagger)">
+      <svg class="icono" aria-hidden="true"><use href="#i-codigo"/></svg>
+      <span class="solo-lector">Documentación de la API (Swagger)</span>
+    </a>
+  </aside>
+
+  <div class="contenido">
+    <header class="cabecera">
+      <div class="cabecera__fila">
+        <a class="marca" href="#propietarios">
+          <span class="marca__icono"><svg class="icono" aria-hidden="true"><use href="#i-huella"/></svg></span>
+          <span class="marca__texto">
+            <strong>Clínica Veterinaria</strong>
+            <small>Panel de gestión</small>
+          </span>
         </a>
-      </div>
-    </div>
-    <nav class="pestanas" aria-label="Secciones">
-      <a class="pestana" href="#propietarios" data-seccion="propietarios">Propietarios <span class="contador" id="conteo-propietarios">–</span></a>
-      <a class="pestana" href="#mascotas" data-seccion="mascotas">Mascotas <span class="contador" id="conteo-mascotas">–</span></a>
-    </nav>
-  </header>
-
-  <main class="principal">
-    <section id="seccion-propietarios" aria-labelledby="titulo-propietarios">
-      <div class="encabezado">
-        <div>
-          <h1 id="titulo-propietarios">Propietarios</h1>
-          <p>Dueños de las mascotas que atiende la clínica.</p>
+        <div class="cabecera__acciones">
+          <span class="estado-api" id="estado-api" data-estado="cargando" role="status">
+            <svg class="icono estado-api__icono" aria-hidden="true"><use href="#i-check"/></svg>
+            <span id="estado-api-texto">Conectando…</span>
+          </span>
+          <a class="enlace-api" href="/swagger" target="_blank" rel="noopener">
+            Swagger
+            <svg class="icono" aria-hidden="true"><use href="#i-externo"/></svg>
+          </a>
         </div>
-        <button class="boton boton--primario" id="nuevo-propietario" type="button">
-          <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
-          Nuevo propietario
-        </button>
       </div>
+      <nav class="pestanas" aria-label="Secciones">
+        <a class="pestana" href="#propietarios" data-seccion="propietarios">Propietarios <span class="contador" id="conteo-propietarios">–</span></a>
+        <a class="pestana" href="#mascotas" data-seccion="mascotas">Mascotas <span class="contador" id="conteo-mascotas">–</span></a>
+      </nav>
+    </header>
 
-      <div class="panel">
-        <div class="filtros">
-          <div class="busqueda">
-            <svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>
-            <input id="buscar-propietario" type="search" placeholder="Buscar por nombre o DNI" aria-label="Buscar por nombre o DNI" autocomplete="off">
+    <main class="principal">
+      <section id="seccion-propietarios" aria-labelledby="titulo-propietarios">
+        <div class="encabezado">
+          <div>
+            <h1 id="titulo-propietarios">Propietarios <span class="titulo-conteo" id="resultado-propietarios"></span></h1>
+            <p>Dueños de las mascotas que atiende la clínica.</p>
           </div>
+          <button class="boton boton--primario" id="nuevo-propietario" type="button">
+            <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+            Nuevo propietario
+          </button>
         </div>
-        <div class="tabla-contenedor">
-          <table class="tabla">
-            <thead>
-              <tr>
-                <th scope="col">Propietario</th>
-                <th scope="col">DNI</th>
-                <th scope="col">Teléfono</th>
-                <th scope="col">Mascotas</th>
-                <th scope="col"><span class="solo-lector">Acciones</span></th>
-              </tr>
-            </thead>
-            <tbody id="filas-propietarios"></tbody>
-          </table>
-        </div>
-      </div>
-    </section>
 
-    <section id="seccion-mascotas" aria-labelledby="titulo-mascotas" hidden>
-      <div class="encabezado">
-        <div>
-          <h1 id="titulo-mascotas">Mascotas</h1>
-          <p>Pacientes registrados y su propietario.</p>
+        <div class="panel">
+          <div class="filtros">
+            <div class="busqueda entrada">
+              <svg class="icono busqueda__icono" aria-hidden="true"><use href="#i-buscar"/></svg>
+              <input id="buscar-propietario" type="search" placeholder="Buscar por nombre o DNI" aria-label="Buscar por nombre o DNI" autocomplete="off">
+              <button class="entrada__limpiar" type="button" aria-label="Borrar búsqueda" hidden>
+                <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="tabla-contenedor">
+            <table class="tabla" id="tabla-propietarios">
+              <thead>
+                <tr>
+                  <th scope="col"><button class="orden" type="button" data-orden="nombres">Propietario <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col"><button class="orden" type="button" data-orden="dni">DNI <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col">Teléfono</th>
+                  <th scope="col"><button class="orden" type="button" data-orden="cantidadMascotas">Mascotas <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col"><span class="solo-lector">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="filas-propietarios"></tbody>
+            </table>
+          </div>
+          <div class="paginacion" id="paginacion-propietarios" hidden></div>
+          <svg class="marca-agua" viewBox="0 0 52 26" aria-hidden="true"><use href="#i-gato" x="0" y="1" width="24" height="24"/><use href="#i-perro" x="27" y="1" width="24" height="24"/></svg>
         </div>
-        <button class="boton boton--primario" id="nueva-mascota" type="button">
-          <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
-          Nueva mascota
-        </button>
-      </div>
+      </section>
 
-      <div class="panel">
-        <form class="filtros filtros--rejilla" id="filtros-mascotas" autocomplete="off">
-          <label class="filtro">Especie
-            <select id="filtro-especie" name="especie">
-              <option value="">Todas</option>
-            </select>
-          </label>
-          <label class="filtro">Raza
-            <input id="filtro-raza" name="raza" type="search" placeholder="Labrador" maxlength="50">
-          </label>
-          <label class="filtro">Nombre
-            <input id="filtro-nombre" name="nombre" type="search" placeholder="Firulais" maxlength="50">
-          </label>
-          <button class="boton boton--secundario" id="limpiar-filtros" type="reset">Limpiar</button>
-        </form>
-        <div class="tabla-contenedor">
-          <table class="tabla">
-            <thead>
-              <tr>
-                <th scope="col">Mascota</th>
-                <th scope="col">Especie</th>
-                <th scope="col">Nacimiento</th>
-                <th scope="col" class="numero">Peso</th>
-                <th scope="col">Propietario</th>
-                <th scope="col"><span class="solo-lector">Acciones</span></th>
-              </tr>
-            </thead>
-            <tbody id="filas-mascotas"></tbody>
-          </table>
+      <section id="seccion-mascotas" aria-labelledby="titulo-mascotas" hidden>
+        <div class="encabezado">
+          <div>
+            <h1 id="titulo-mascotas">Mascotas <span class="titulo-conteo" id="resultado-mascotas"></span></h1>
+            <p>Pacientes registrados y su propietario.</p>
+          </div>
+          <button class="boton boton--primario" id="nueva-mascota" type="button">
+            <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+            Nueva mascota
+          </button>
         </div>
-      </div>
-    </section>
-  </main>
+
+        <div class="panel">
+          <form class="filtros filtros--rejilla" id="filtros-mascotas" autocomplete="off">
+            <label class="filtro">Especie
+              <span class="selector">
+                <select id="filtro-especie" name="especie">
+                  <option value="">Todas</option>
+                </select>
+                <svg class="icono" aria-hidden="true"><use href="#i-chevron"/></svg>
+              </span>
+            </label>
+            <label class="filtro">Raza
+              <span class="entrada">
+                <input id="filtro-raza" name="raza" type="search" placeholder="Labrador" maxlength="50">
+                <button class="entrada__limpiar" type="button" aria-label="Borrar raza" hidden>
+                  <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+                </button>
+              </span>
+            </label>
+            <label class="filtro">Nombre
+              <span class="entrada">
+                <input id="filtro-nombre" name="nombre" type="search" placeholder="Firulais" maxlength="50">
+                <button class="entrada__limpiar" type="button" aria-label="Borrar nombre" hidden>
+                  <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+                </button>
+              </span>
+            </label>
+            <button class="boton boton--secundario" id="limpiar-filtros" type="reset">Limpiar</button>
+          </form>
+          <div class="tabla-contenedor">
+            <table class="tabla" id="tabla-mascotas">
+              <thead>
+                <tr>
+                  <th scope="col"><button class="orden" type="button" data-orden="nombre">Mascota <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col"><button class="orden" type="button" data-orden="especie">Especie <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col"><button class="orden" type="button" data-orden="fechaNacimiento">Nacimiento <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col" class="numero"><button class="orden" type="button" data-orden="peso">Peso <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col"><button class="orden" type="button" data-orden="propietario">Propietario <svg class="icono" aria-hidden="true"><use href="#i-orden"/></svg></button></th>
+                  <th scope="col"><span class="solo-lector">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody id="filas-mascotas"></tbody>
+            </table>
+          </div>
+          <div class="paginacion" id="paginacion-mascotas" hidden></div>
+          <svg class="marca-agua" viewBox="0 0 52 26" aria-hidden="true"><use href="#i-gato" x="0" y="1" width="24" height="24"/><use href="#i-perro" x="27" y="1" width="24" height="24"/></svg>
+        </div>
+      </section>
+    </main>
+  </div>
 
   <dialog class="dialogo" id="dialogo-propietario" aria-labelledby="titulo-form-propietario">
     <form id="form-propietario" novalidate>
@@ -179,9 +241,12 @@
         <div class="rejilla-campos">
           <div class="campo campo--ancho">
             <label for="mascota-propietario">Propietario</label>
-            <select id="mascota-propietario" name="propietarioId">
-              <option value="">Selecciona un propietario</option>
-            </select>
+            <span class="selector">
+              <select id="mascota-propietario" name="propietarioId">
+                <option value="">Selecciona un propietario</option>
+              </select>
+              <svg class="icono" aria-hidden="true"><use href="#i-chevron"/></svg>
+            </span>
           </div>
           <div class="campo">
             <label for="mascota-nombre">Nombre</label>
@@ -231,6 +296,29 @@
       <button class="boton boton--primario" id="detalle-agregar" type="button">
         <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
         Agregar mascota
+      </button>
+    </footer>
+  </dialog>
+
+  <dialog class="dialogo dialogo--pequeno" id="dialogo-contacto" aria-labelledby="titulo-contacto">
+    <header class="dialogo__cabecera">
+      <div class="dialogo__persona">
+        <span id="avatar-contacto"></span>
+        <div>
+          <h2 id="titulo-contacto">Contacto del propietario</h2>
+          <p class="dialogo__subtitulo">Datos de contacto</p>
+        </div>
+      </div>
+      <button class="boton-icono" type="button" data-cerrar aria-label="Cerrar">
+        <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+      </button>
+    </header>
+    <div class="dialogo__cuerpo" id="contenido-contacto"></div>
+    <footer class="dialogo__pie">
+      <button class="boton boton--secundario" type="button" data-cerrar>Cerrar</button>
+      <button class="boton boton--primario" id="contacto-mascotas" type="button">
+        <svg class="icono" aria-hidden="true"><use href="#i-huella"/></svg>
+        Ver sus mascotas
       </button>
     </footer>
   </dialog>

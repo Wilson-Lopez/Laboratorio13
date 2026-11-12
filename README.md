@@ -46,7 +46,7 @@ Relación: un propietario (1) tiene muchas mascotas (N), mediante la clave forá
 
 ## Panel web
 
-`Veterinaria.Api/wwwroot` contiene un panel (HTML, CSS y JavaScript sin librerías) que consume la API con `fetch` desde el mismo sitio, por eso no necesita CORS. Usa solo los DTOs que devuelve la API: lista y filtra propietarios y mascotas con los GET por query string, muestra las mascotas de un propietario con la ruta anidada y registra, edita y elimina mostrando los errores 400 (por campo), 404 y 409 (regla de negocio) que responde la API.
+`Veterinaria.Api/wwwroot` contiene un panel (HTML, CSS y JavaScript sin librerías) que consume la API con `fetch` desde el mismo sitio, por eso no necesita CORS. Usa solo los DTOs que devuelve la API: lista y filtra propietarios y mascotas con los GET por query string (con orden por columna y paginación en el navegador), muestra el contacto de un propietario con `GET api/propietarios/{id}` y sus mascotas con la ruta anidada, y registra, edita y elimina mostrando los errores 400 (por campo), 404 y 409 (regla de negocio) que responde la API. Como la API no guarda fotos, las mascotas se muestran con un dibujo según su especie y los propietarios con sus iniciales.
 
 ## Endpoints
 
