@@ -8,7 +8,6 @@ public class MappingProfile : Profile
 {
     public MappingProfile()
     {
-        // ---------- Propietarios ----------
 
         // Entidad -> DTO de lectura (lo que devuelve la API)
         CreateMap<Propietario, PropietarioDto>()
@@ -20,8 +19,6 @@ public class MappingProfile : Profile
 
         // DTO de entrada -> Entidad existente (PUT)
         CreateMap<PropietarioActualizarDto, Propietario>();
-
-        // ---------- Mascotas ----------
 
         // Entidad -> DTO de lectura (lo que devuelve la API)
         CreateMap<Mascota, MascotaDto>()
