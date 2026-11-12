@@ -27,10 +27,10 @@ Relación: un propietario (1) tiene muchas mascotas (N), mediante la clave forá
    sqlcmd -S .\SQLEXPRESS -E -C -f 65001 -i VeterinariaDB.sql
    ```
 
-2. Guardar la cadena de conexión en user-secrets (no se sube al repositorio):
+2. Guardar la cadena de conexión en user-secrets (no se sube al repositorio). Reemplaza `<cadena de conexión>` por la de tu SQL Server:
 
    ```
-   dotnet user-secrets set "ConnectionStrings:VeterinariaDB" "Server=.\SQLEXPRESS;Database=VeterinariaDB;Trusted_Connection=True;TrustServerCertificate=True" --project Veterinaria.Api
+   dotnet user-secrets set "ConnectionStrings:VeterinariaDB" "<cadena de conexión>" --project Veterinaria.Api
    ```
 
 3. Ejecutar la API:
