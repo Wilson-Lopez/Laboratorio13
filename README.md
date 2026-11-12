@@ -9,7 +9,7 @@ Web API REST en capas con ASP.NET Core (.NET 10), Entity Framework Core 10 (base
 | `Veterinaria.Entidades` | Entidades (`Propietario`, `Mascota`) y DTOs (`Dtos/`) | — |
 | `Veterinaria.Datos` | `VeterinariaContext` (Scaffold) y repositorios con sus interfaces | Entidades |
 | `Veterinaria.Negocio` | Servicios con sus interfaces, reglas de negocio, excepciones y `MappingProfile` | Datos |
-| `Veterinaria.Api` | Controladores, `Program.cs` y pruebas `Veterinaria.Api.http` | Negocio |
+| `Veterinaria.Api` | Controladores, `Program.cs`, pruebas `Veterinaria.Api.http` y panel web (`wwwroot`) | Negocio |
 
 Relación: un propietario (1) tiene muchas mascotas (N), mediante la clave foránea `Mascotas.PropietarioId`.
 
@@ -33,13 +33,20 @@ Relación: un propietario (1) tiene muchas mascotas (N), mediante la clave forá
    dotnet user-secrets set "ConnectionStrings:VeterinariaDB" "Server=.\SQLEXPRESS;Database=VeterinariaDB;Trusted_Connection=True;TrustServerCertificate=True" --project Veterinaria.Api
    ```
 
-3. Ejecutar la API y abrir Swagger en `http://localhost:5169/swagger`:
+3. Ejecutar la API:
 
    ```
    dotnet run --project Veterinaria.Api --launch-profile http
    ```
 
+   - Panel web que consume la API: `http://localhost:5169/`
+   - Swagger: `http://localhost:5169/swagger`
+
 4. Probar los endpoints en orden con `Veterinaria.Api/Veterinaria.Api.http` (volver a ejecutar el script SQL antes de repetir las pruebas).
+
+## Panel web
+
+`Veterinaria.Api/wwwroot` contiene un panel (HTML, CSS y JavaScript sin librerías) que consume la API con `fetch` desde el mismo sitio, por eso no necesita CORS. Usa solo los DTOs que devuelve la API: lista y filtra propietarios y mascotas con los GET por query string, muestra las mascotas de un propietario con la ruta anidada y registra, edita y elimina mostrando los errores 400 (por campo), 404 y 409 (regla de negocio) que responde la API.
 
 ## Endpoints
 

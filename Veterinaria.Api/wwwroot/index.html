@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Panel de gestión de propietarios y mascotas de la clínica veterinaria.">
+  <title>Clínica Veterinaria · Panel de gestión</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230f766e'/%3E%3Cg transform='translate(4 4)' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='4' r='2'/%3E%3Ccircle cx='18' cy='8' r='2'/%3E%3Ccircle cx='20' cy='16' r='2'/%3E%3Cpath d='M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z'/%3E%3C/g%3E%3C/svg%3E">
+  <link rel="stylesheet" href="estilos.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-huella" viewBox="0 0 24 24"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-editar" viewBox="0 0 24 24"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol>
+    <symbol id="i-eliminar" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+    <symbol id="i-buscar" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></symbol>
+    <symbol id="i-cerrar" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+    <symbol id="i-externo" viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></symbol>
+    <symbol id="i-alerta" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></symbol>
+    <symbol id="i-listo" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4 12 14.01l-3-3"/></symbol>
+  </svg>
+
+  <header class="cabecera">
+    <div class="cabecera__fila">
+      <a class="marca" href="#propietarios">
+        <span class="marca__icono"><svg class="icono" aria-hidden="true"><use href="#i-huella"/></svg></span>
+        <span class="marca__texto">
+          <strong>Clínica Veterinaria</strong>
+          <small>Panel de gestión</small>
+        </span>
+      </a>
+      <div class="cabecera__acciones">
+        <span class="estado-api" id="estado-api" data-estado="cargando" role="status">Conectando…</span>
+        <a class="enlace-api" href="/swagger" target="_blank" rel="noopener">
+          Swagger
+          <svg class="icono" aria-hidden="true"><use href="#i-externo"/></svg>
+        </a>
+      </div>
+    </div>
+    <nav class="pestanas" aria-label="Secciones">
+      <a class="pestana" href="#propietarios" data-seccion="propietarios">Propietarios <span class="contador" id="conteo-propietarios">–</span></a>
+      <a class="pestana" href="#mascotas" data-seccion="mascotas">Mascotas <span class="contador" id="conteo-mascotas">–</span></a>
+    </nav>
+  </header>
+
+  <main class="principal">
+    <section id="seccion-propietarios" aria-labelledby="titulo-propietarios">
+      <div class="encabezado">
+        <div>
+          <h1 id="titulo-propietarios">Propietarios</h1>
+          <p>Dueños de las mascotas que atiende la clínica.</p>
+        </div>
+        <button class="boton boton--primario" id="nuevo-propietario" type="button">
+          <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+          Nuevo propietario
+        </button>
+      </div>
+
+      <div class="panel">
+        <div class="filtros">
+          <div class="busqueda">
+            <svg class="icono" aria-hidden="true"><use href="#i-buscar"/></svg>
+            <input id="buscar-propietario" type="search" placeholder="Buscar por nombre o DNI" aria-label="Buscar por nombre o DNI" autocomplete="off">
+          </div>
+        </div>
+        <div class="tabla-contenedor">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th scope="col">Propietario</th>
+                <th scope="col">DNI</th>
+                <th scope="col">Teléfono</th>
+                <th scope="col">Mascotas</th>
+                <th scope="col"><span class="solo-lector">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="filas-propietarios"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="seccion-mascotas" aria-labelledby="titulo-mascotas" hidden>
+      <div class="encabezado">
+        <div>
+          <h1 id="titulo-mascotas">Mascotas</h1>
+          <p>Pacientes registrados y su propietario.</p>
+        </div>
+        <button class="boton boton--primario" id="nueva-mascota" type="button">
+          <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+          Nueva mascota
+        </button>
+      </div>
+
+      <div class="panel">
+        <form class="filtros filtros--rejilla" id="filtros-mascotas" autocomplete="off">
+          <label class="filtro">Especie
+            <select id="filtro-especie" name="especie">
+              <option value="">Todas</option>
+            </select>
+          </label>
+          <label class="filtro">Raza
+            <input id="filtro-raza" name="raza" type="search" placeholder="Labrador" maxlength="50">
+          </label>
+          <label class="filtro">Nombre
+            <input id="filtro-nombre" name="nombre" type="search" placeholder="Firulais" maxlength="50">
+          </label>
+          <button class="boton boton--secundario" id="limpiar-filtros" type="reset">Limpiar</button>
+        </form>
+        <div class="tabla-contenedor">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th scope="col">Mascota</th>
+                <th scope="col">Especie</th>
+                <th scope="col">Nacimiento</th>
+                <th scope="col" class="numero">Peso</th>
+                <th scope="col">Propietario</th>
+                <th scope="col"><span class="solo-lector">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="filas-mascotas"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="dialogo" id="dialogo-propietario" aria-labelledby="titulo-form-propietario">
+    <form id="form-propietario" novalidate>
+      <header class="dialogo__cabecera">
+        <h2 id="titulo-form-propietario">Nuevo propietario</h2>
+        <button class="boton-icono" type="button" data-cerrar aria-label="Cerrar">
+          <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+        </button>
+      </header>
+      <div class="dialogo__cuerpo">
+        <div class="aviso" role="alert" hidden></div>
+        <div class="rejilla-campos">
+          <div class="campo campo--ancho">
+            <label for="propietario-nombres">Nombres y apellidos</label>
+            <input id="propietario-nombres" name="nombres" maxlength="100" autocomplete="off">
+          </div>
+          <div class="campo">
+            <label for="propietario-dni">DNI</label>
+            <input id="propietario-dni" name="dni" maxlength="8" inputmode="numeric" autocomplete="off">
+            <p class="campo__ayuda" id="ayuda-dni" hidden>El DNI no se puede modificar.</p>
+          </div>
+          <div class="campo">
+            <label for="propietario-telefono">Teléfono</label>
+            <input id="propietario-telefono" name="telefono" type="tel" maxlength="15" autocomplete="off">
+          </div>
+          <div class="campo campo--ancho">
+            <label for="propietario-correo">Correo <span class="opcional">Opcional</span></label>
+            <input id="propietario-correo" name="correo" type="email" maxlength="100" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <footer class="dialogo__pie">
+        <button class="boton boton--secundario" type="button" data-cerrar>Cancelar</button>
+        <button class="boton boton--primario" type="submit">Guardar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialogo" id="dialogo-mascota" aria-labelledby="titulo-form-mascota">
+    <form id="form-mascota" novalidate>
+      <header class="dialogo__cabecera">
+        <h2 id="titulo-form-mascota">Nueva mascota</h2>
+        <button class="boton-icono" type="button" data-cerrar aria-label="Cerrar">
+          <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+        </button>
+      </header>
+      <div class="dialogo__cuerpo">
+        <div class="aviso" role="alert" hidden></div>
+        <div class="rejilla-campos">
+          <div class="campo campo--ancho">
+            <label for="mascota-propietario">Propietario</label>
+            <select id="mascota-propietario" name="propietarioId">
+              <option value="">Selecciona un propietario</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="mascota-nombre">Nombre</label>
+            <input id="mascota-nombre" name="nombre" maxlength="50" autocomplete="off">
+          </div>
+          <div class="campo">
+            <label for="mascota-especie">Especie</label>
+            <input id="mascota-especie" name="especie" maxlength="30" list="lista-especies" autocomplete="off">
+            <datalist id="lista-especies"></datalist>
+          </div>
+          <div class="campo">
+            <label for="mascota-raza">Raza <span class="opcional">Opcional</span></label>
+            <input id="mascota-raza" name="raza" maxlength="50" autocomplete="off">
+          </div>
+          <div class="campo">
+            <label for="mascota-fecha">Fecha de nacimiento</label>
+            <input id="mascota-fecha" name="fechaNacimiento" type="date">
+          </div>
+          <div class="campo">
+            <label for="mascota-peso">Peso (kg)</label>
+            <input id="mascota-peso" name="peso" type="number" step="0.01" min="0.01" max="150" inputmode="decimal" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <footer class="dialogo__pie">
+        <button class="boton boton--secundario" type="button" data-cerrar>Cancelar</button>
+        <button class="boton boton--primario" type="submit">Guardar</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="dialogo" id="dialogo-detalle" aria-labelledby="titulo-detalle">
+    <header class="dialogo__cabecera">
+      <div>
+        <h2 id="titulo-detalle">Mascotas del propietario</h2>
+        <p class="dialogo__subtitulo" id="subtitulo-detalle"></p>
+      </div>
+      <button class="boton-icono" type="button" data-cerrar aria-label="Cerrar">
+        <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+      </button>
+    </header>
+    <div class="dialogo__cuerpo">
+      <ul class="lista-mascotas" id="lista-detalle"></ul>
+    </div>
+    <footer class="dialogo__pie">
+      <button class="boton boton--secundario" type="button" data-cerrar>Cerrar</button>
+      <button class="boton boton--primario" id="detalle-agregar" type="button">
+        <svg class="icono" aria-hidden="true"><use href="#i-mas"/></svg>
+        Agregar mascota
+      </button>
+    </footer>
+  </dialog>
+
+  <dialog class="dialogo dialogo--pequeno" id="dialogo-confirmar" aria-labelledby="titulo-confirmar">
+    <header class="dialogo__cabecera">
+      <h2 id="titulo-confirmar">Confirmar eliminación</h2>
+      <button class="boton-icono" type="button" data-cerrar aria-label="Cerrar">
+        <svg class="icono" aria-hidden="true"><use href="#i-cerrar"/></svg>
+      </button>
+    </header>
+    <div class="dialogo__cuerpo">
+      <div class="aviso" role="alert" hidden></div>
+      <div id="detalle-confirmar">
+        <p id="texto-confirmar"></p>
+        <p class="texto-suave">Esta acción no se puede deshacer.</p>
+      </div>
+    </div>
+    <footer class="dialogo__pie">
+      <button class="boton boton--secundario" id="cancelar-eliminar" type="button" data-cerrar>Cancelar</button>
+      <button class="boton boton--peligro" id="confirmar-eliminar" type="button">Eliminar</button>
+    </footer>
+  </dialog>
+
+  <div class="avisos" id="avisos" role="status" aria-live="polite"></div>
+</body>
+</html>
